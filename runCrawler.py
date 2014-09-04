@@ -9,11 +9,12 @@ from io import StringIO, BytesIO
 
 # Local Module Imports
 from parseHtml import ParseHtml, getHtml
+from crawler import Crawler
 
 def main():
-  p = ParseHtml('http://davidmoench.com/fmri-viz.php')
-  print 'links', p.getLinks()
-  print 'assets', p.getAssets()
+  c = Crawler('http://davidmoench.com')
+  #c = Crawler('http://digitalocean.com')
+  c.outputSitemap()
 
 if __name__ == '__main__':
   main()
