@@ -4,7 +4,7 @@
 
 # Library Imports
 import requests
-from urlparse import urlparse
+from urlparse import urlparse, urljoin
 from lxml import etree
 import lxml.html
 from io import StringIO, BytesIO
@@ -14,28 +14,52 @@ from io import StringIO, BytesIO
 class ParseHtml:
 
   def __init__(self, url_string):
-    html_string = getHtml(url_string)
-    parser      = etree.HTMLParser()
-    tree        = etree.parse(StringIO(html_string), parser)
-    self.root   = tree.getroot()
-    self.up     = urlparse(url_string)
+    html_string   = getHtml(url_string)
+    parser        = etree.HTMLParser()
+    tree          = etree.parse(StringIO(html_string), parser)
+    self.root     = tree.getroot()
+    self.up       = urlparse(url_string)
+    self.base_url = self.up.scheme + '://' + self.up.netloc
+
+    self.links    = []
+    self.assets   = []
+
+    # Parse <a> tags for links and assets
+    for e in self.root.iter('a'):
+      link = urljoin(self.base_url, e.get('href'))
+      if link[-4:] == '.pdf':
+        self.assets += [link]
+      else:
+        self.links += [link]
+
+    # Parse <link> tags for assets
+    for e in self.root.iter('link'):
+      link = urljoin(self.base_url, e.get('href'))
+      self.assets += [link]
+
+    # Parse <script> tags for assets
+    for e in self.root.iter('script'):
+      link = urljoin(self.base_url, e.get('src'))
+      self.assets += [link]
+
+    # Parse <img> tags for assets
+    for e in self.root.iter('img'):
+      link = urljoin(self.base_url, e.get('src'))
+      self.assets += [link]
+
 
   def getLinks(self):
-    html_string = etree.tostring(self.root)
-    html = lxml.html.fromstring(html_string)
-    html.make_links_absolute(self.up.scheme + '://' + self.up.netloc) #TODO
-    links = [l[2] for l in html.iterlinks()]
-    return links
-    #return list(elem.get('href') for elem in self.root.iter('a'))
+    return self.links
 
-  def getResources(self):
-    assert False
+  def getAssets(self):
+    return self.assets
 
-  def sameDomain(url_string):
+  def sameDomain(self, url_string):
     """
     Return whether the given url string is in this ParseHtml instance's domain.
     """
-    return self.domain == urlparse(url_string).netloc
+    up = urlparse(url_string)
+    return self.base_url == up.scheme + '://' + up.netloc
 
 """
   Helper Functions
