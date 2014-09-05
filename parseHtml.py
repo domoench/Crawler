@@ -38,7 +38,7 @@ class ParseHtml:
       for e in self.root.iter('a'):
       #for e in self.root.xpath('//a'):
         #print 'Unsanitized Child-link: %s' % (e.get('href'))
-        link = urljoin(self.base_url, e.get('href'))
+        link = urljoin(url_string, e.get('href'))
         #print 'Sanitized Child-link: %s' % (link)
 
         # Strip off URL queries and fragments
@@ -56,7 +56,7 @@ class ParseHtml:
       # Parse <link> tags for assets
       for e in self.root.iter('link'):
       #for e in self.root.xpath('//link'):
-        link = urljoin(self.base_url, e.get('href'))
+        link = urljoin(url_string, e.get('href'))
         self.assets.add(link)
 
       # Parse <script> tags for assets
@@ -64,13 +64,13 @@ class ParseHtml:
       #for e in self.root.xpath('//script'):
         src = e.get('src')
         if src:
-          link = urljoin(self.base_url, e.get('src'))
+          link = urljoin(url_string, e.get('src'))
           self.assets.add(link)
 
       # Parse <img> tags for assets
       for e in self.root.iter('img'):
       #for e in self.root.xpath('img'):
-        link = urljoin(self.base_url, e.get('src'))
+        link = urljoin(url_string, e.get('src'))
         self.assets.add(link)
 
   def isEmpty(self):
