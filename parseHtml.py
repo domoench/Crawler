@@ -74,10 +74,10 @@ class ParseHtml:
     return self.root == None
 
   def getLinks(self):
-    return list(self.links) #TODO: Why convert to a list?
+    return self.links
 
   def getAssets(self):
-    return list(self.assets) #TODO: Why convert to a list?
+    return self.assets
 
   def getDomain(self):
     return self.base_url
