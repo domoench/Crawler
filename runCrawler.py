@@ -19,8 +19,11 @@ def main():
              description='A web crawler to generate a sitemap of all pages ' +
                          'and their resources')
   parser.add_argument('-url', help='URL to crawl from', required=True)
+  parser.add_argument('-t', help='Number of crawler threads', type=int, 
+                      default=15)
   args = parser.parse_args()
-  start_url = args.url
+  start_url    = args.url
+  num_crawlers = args.t
 
   print 'Crawling Beginning.'
   start_time = datetime.now()
@@ -33,9 +36,8 @@ def main():
   d = domain(start_url)
 
   # Start Crawler threads
-  NUM_WORKERS = 15
-  print 'Spawning %d crawler threads.' % NUM_WORKERS
-  for i in range(NUM_WORKERS):
+  print 'Spawning %d crawler threads.' % num_crawlers
+  for i in range(num_crawlers):
     t = CrawlThread(d, crawlqueue, outqueue, lock, crawled)
     t.setDaemon(True)
     t.start()

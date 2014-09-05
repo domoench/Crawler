@@ -6,7 +6,7 @@
 import requests
 from urlparse import urlparse, urljoin, urlunparse
 from lxml import etree
-from io import StringIO, BytesIO
+#from io import StringIO, BytesIO
 import codecs
 
 # Local Module Imports
@@ -30,9 +30,12 @@ class ParseHtml:
       try:
         html_bytes = codecs.encode(html_string, 'utf-8', 'xmlcharrefreplace')
         self.root  = etree.HTML(html_bytes)
+        if self.root == None:
+          return 
       except Exception as e:
         print 'ERROR: ', e
       self.base_url = domain(url_string) 
+
 
       # Parse <a> tags for links and assets
       for e in self.root.iter('a'):
@@ -48,7 +51,7 @@ class ParseHtml:
         #print 'Stripped Child-link: %s' % (link)
 
         suffix = link[-4:]
-        if suffix in ['.pdf', '.zip', '.eps', '.jpg', '.png', '.gif', '.svg']:
+        if suffix in ['.pdf', '.zip', '.eps', '.jpg', '.png', '.gif', '.svg', '.qtl']:
           self.assets.add(link)
         else:
           self.links.add(link)
@@ -76,7 +79,7 @@ class ParseHtml:
   def isEmpty(self):
     """
     Returns true if this instance failed to retrieve web content during 
-    construction.
+    construction, leaving this ParseHtml instance with no useful data.
     """
     return self.root == None
 
@@ -114,7 +117,7 @@ def getHtml(url_string):
       assert type(result) is unicode
 
   except Exception as e:
-    print 'EXCEPTION: ', e 
+    print 'Exception Handled: ', e 
     return None
 
   return result
