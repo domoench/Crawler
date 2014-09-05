@@ -18,6 +18,8 @@ class ParseHtml:
     self.root     = None
     self.base_url = None
 
+    #print 'constructing ParseHtml(%s)' % (url_string)
+
     # Get the page content over HTTP
     html_string = getHtml(url_string)
 
@@ -31,13 +33,15 @@ class ParseHtml:
 
       # Parse <a> tags for links and assets
       for e in self.root.iter('a'):
+        #print 'Unsanitized Child-link: %s' % (e.get('href'))
         link = urljoin(self.base_url, e.get('href'))
+        #print 'Sanitized Child-link: %s' % (link)
 
-        # Strip off URL queries
-        if link.find('?') >= 0:
-          parts = list(urlparse(link))
-          parts[4] = '' 
-          link = urlunparse(parts)
+        # Strip off URL queries and fragments
+        parts = list(urlparse(link, allow_fragments=False))
+        parts[4] = '' 
+        link = urlunparse(parts)
+        #print 'Stripped Child-link: %s' % (link)
 
         suffix = link[-4:]
         if suffix in ['.pdf', '.zip', '.eps', '.jpg', '.png', '.gif', '.svg']:
@@ -70,10 +74,10 @@ class ParseHtml:
     return self.root == None
 
   def getLinks(self):
-    return list(self.links)
+    return list(self.links) #TODO: Why convert to a list?
 
   def getAssets(self):
-    return list(self.assets)
+    return list(self.assets) #TODO: Why convert to a list?
 
   def getDomain(self):
     return self.base_url
@@ -92,10 +96,15 @@ class ParseHtml:
 def getHtml(url_string):
   """
   Make an HTTP request to the given url string and return the HTML string.
+
+  TODO: Try/catch exceptions shown at https://stackoverflow.com/questions/25146901/python-requests-with-multithreading
+        When catching exceptions, handle by outputting error to console and returning none?
   """
+  print 'getHtml(%s)' % url_string
   r = requests.get(url_string)
 
   if r.status_code != 200:
+    print 'getHtml(%s) failed. Status code = %s' % (url_string, r.status_code)
     return None 
 
   return unicode(r.content, 'UTF-8')
