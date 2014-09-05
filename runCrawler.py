@@ -33,7 +33,8 @@ def main():
   d = domain(start_url)
 
   # Start Crawler threads
-  NUM_WORKERS = 5
+  NUM_WORKERS = 15
+  print 'Spawning %d crawler threads.' % NUM_WORKERS
   for i in range(NUM_WORKERS):
     t = CrawlThread(d, crawlqueue, outqueue, lock, crawled)
     t.setDaemon(True)

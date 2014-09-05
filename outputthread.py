@@ -11,14 +11,12 @@ import codecs
 class OutputThread(threading.Thread):
 
   def __init__(self, outqueue):
-    # TODO: Store a reference to an output file
-    print 'Spawning OutputThread'
     self.outqueue = outqueue
     self.outfile  = codecs.open('sitemap.txt', 'w', encoding='utf8')
     threading.Thread.__init__(self)
 
   def __del__(self):
-    print 'Destroying OutputThread'
+    #print 'Destroying OutputThread'
     self.outfile.close()
     threading.Thread.__del__(self)
 
@@ -35,7 +33,7 @@ class OutputThread(threading.Thread):
     Args:
       page_data: A tuple of info about a crawled page: (url, links, assets)
     """
-    print 'outputthread.writeData(%s)' % (page_data[0])
+    #print 'outputthread.writeData(%s)' % (page_data[0])
     url    = page_data[0]
     links  = page_data[1]
     assets = page_data[2]

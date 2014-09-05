@@ -19,7 +19,6 @@ class CrawlThread(threading.Thread):
       lock: Lock ensuring mutual exclusion of crawled
       crawled: A set of URLs that have already been crawled
     """
-    print 'Spawning CrawlThread'
     self.domain     = domain
     self.crawlqueue = crawlqueue
     self.outqueue   = outqueue
@@ -34,20 +33,18 @@ class CrawlThread(threading.Thread):
     """
     while True:
       url = self.crawlqueue.get()
-      print 'Removed %s from the crawlqueue' % url
+      #print 'Removed %s from the crawlqueue' % url
       page_data = self.processPage(url)
       if not page_data:
-        print 'processPage() failed for %s' % url
+        self.crawlqueue.task_done()
         continue
 
-      assert page_data[0] == url
-
       # This page's data is ready for printing
-      print 'Adding %s to outqueue' % url
+      #print 'Adding %s to outqueue' % url
       self.outqueue.put(page_data)
   
       # Schedule this page's children for crawling 
-      self.lock.acquire() # THIS MAY NOT BE NECESSARY: GIL MAY DO THIS
+      self.lock.acquire()
       #print 'Aquired lock to recurse on %s' % url
       for link in page_data[1]:
         if (link not in self.crawled) and (domain(link) == self.domain):
@@ -68,7 +65,7 @@ class CrawlThread(threading.Thread):
       A tuple of the form (url, list of link strings, list of asset path strings)
       None if there was an issue processing this page
     """
-    print 'crawlthread.processPage(%s)' % (url)
+    #print 'crawlthread.processPage(%s)' % (url)
     assert(domain(url) == self.domain)
     p = ParseHtml(url)
     if p.isEmpty():
@@ -77,4 +74,3 @@ class CrawlThread(threading.Thread):
     links = p.getLinks()
     assets = p.getAssets()
     return (url, links, assets)
-
