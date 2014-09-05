@@ -3,6 +3,7 @@
 """
 
 # Library Imports
+import argparse
 import threading
 import Queue
 from datetime import datetime
@@ -13,6 +14,14 @@ from outputthread import OutputThread
 from parseHtml import domain
 
 def main():
+  # Parse command line args
+  parser = argparse.ArgumentParser(prog='crawler',
+             description='A web crawler to generate a sitemap of all pages ' +
+                         'and their resources')
+  parser.add_argument('-url', help='URL to crawl from', required=True)
+  args = parser.parse_args()
+  start_url = args.url
+
   print 'Crawling Beginning.'
   start_time = datetime.now()
 
@@ -21,7 +30,6 @@ def main():
   lock       = threading.Lock()
   crawled    = set()
 
-  start_url = 'http://www.hiddenjunk.net'
   d = domain(start_url)
 
   # Start Crawler threads

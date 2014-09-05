@@ -4,6 +4,7 @@ TODO
 # Library Imports
 import threading
 import Queue
+import codecs
 
 # Local Module Imports
 
@@ -13,7 +14,7 @@ class OutputThread(threading.Thread):
     # TODO: Store a reference to an output file
     print 'Spawning OutputThread'
     self.outqueue = outqueue
-    self.outfile  = open('sitemap.txt', 'w')
+    self.outfile  = codecs.open('sitemap.txt', 'w', encoding='utf8')
     threading.Thread.__init__(self)
 
   def __del__(self):
