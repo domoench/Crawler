@@ -5,7 +5,7 @@ A multi-thread web crawler. Developed for compatibility with Python 2.7.8.
 
 ### To Run:
 ```
-python runCrawler.py -url https://website.com -t 60
+python runCrawler.py -url https://website.com -t 30
 ```
 
 ### To Test:
