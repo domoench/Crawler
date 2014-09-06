@@ -1,5 +1,6 @@
 """
-  A class for parsing and querying an HTML page.
+  A module for retrieving, parsing, and querying web pages and verifying 
+  URLs. 
 """
 
 # Library Imports
@@ -99,11 +100,11 @@ class ParseHtml:
   def getDomain(self):
     return self.domain
 
-  def sameDomain(self, url):
+  def sameDomain(self, other_url):
     """
     Return whether the given url string is in this ParseHtml instance's domain.
     """
-    up = urlparse(url)
+    up = urlparse(other_url)
     return self.getDomain() == up.scheme + '://' + up.netloc
 
 """
@@ -135,5 +136,5 @@ def domain(url):
   return up.scheme + '://' + up.netloc
 
 def validURL(url):
-  u = urlparse(url, allow_fragments=False)
-  return (u.scheme != '' and u.netloc != '')
+  up = urlparse(url)
+  return (up.scheme != '' and up.netloc != '')

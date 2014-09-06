@@ -54,8 +54,6 @@ def main():
 
   dt = datetime.now() - start_time
   print 'Crawling finished. Time elapsed: ', dt 
-  #ms = (dt.days * 24 * 60 * 60 + dt.seconds) * 1000 + dt.microseconds / 1000.0
-  #print str(num_crawlers) + ' ' + str(ms)
 
 if __name__ == '__main__':
   main()
