@@ -1,22 +1,20 @@
 """
-TODO
+  A thread to handle outputing crawled page data to the sitemap output file.
 """
+
 # Library Imports
 import threading
 import Queue
 import codecs
 
-# Local Module Imports
-
 class OutputThread(threading.Thread):
 
   def __init__(self, outqueue):
     self.outqueue = outqueue
-    self.outfile  = codecs.open('sitemap.txt', 'w', encoding='utf8')
+    self.outfile  = codecs.open('sitemap.txt', 'w', encoding='utf-8')
     threading.Thread.__init__(self)
 
   def __del__(self):
-    #print 'Destroying OutputThread'
     self.outfile.close()
     threading.Thread.__del__(self)
 
@@ -28,12 +26,11 @@ class OutputThread(threading.Thread):
 
   def writeData(self, page_data):
     """
-    TODO
+    Output the links and static assets associated with a single crawled page. 
 
     Args:
       page_data: A tuple of info about a crawled page: (url, links, assets)
     """
-    #print 'outputthread.writeData(%s)' % (page_data[0])
     url    = page_data[0]
     links  = page_data[1]
     assets = page_data[2]

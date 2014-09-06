@@ -1,5 +1,5 @@
 """
-  TODO
+  Main driver. 
 """
 
 # Library Imports
@@ -49,10 +49,13 @@ def main():
 
   crawlqueue.put(start_url)
 
-  # TODO: How to terminate. Wait for a while then join the threads and queues?
   crawlqueue.join()
   outqueue.join()
-  print 'Crawling Finished. Time Elapsed: ', datetime.now() - start_time
+
+  dt = datetime.now() - start_time
+  print 'Crawling finished. Time elapsed: ', dt 
+  #ms = (dt.days * 24 * 60 * 60 + dt.seconds) * 1000 + dt.microseconds / 1000.0
+  #print str(num_crawlers) + ' ' + str(ms)
 
 if __name__ == '__main__':
   main()

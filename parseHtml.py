@@ -6,80 +6,87 @@
 import requests
 from urlparse import urlparse, urljoin, urlunparse
 from lxml import etree
-#from io import StringIO, BytesIO
 import codecs
-
-# Local Module Imports
 
 class ParseHtml:
 
-  def __init__(self, url_string):
-    self.links    = set() 
-    self.assets   = set() 
-    self.root     = None
-    self.base_url = None
+  def __init__(self, url):
+    """ 
+    If retrieving and parsing data from the given URL fails for any reason, the
+    constructor is aborted leaving self.root == None. This can be checked with
+    isEmpty().
 
-    #print 'constructing ParseHtml(%s)' % (url_string)
+    A 'link' is a link to a crawlable page.
+    An 'asset' is a link to a non-crawlable static asset: images, js, css, etc. 
+    """
 
-    # Get the page content over HTTP
-    html_string = getHtml(url_string)
+    self.links  = set() 
+    self.assets = set() 
+    self.root   = None
+    self.domain = None
+
+    # Get the page content from the network 
+    html_string = getHtml(url)
 
     if not html_string:
       return
+
     else:
       try:
-        html_bytes = codecs.encode(html_string, 'utf-8', 'xmlcharrefreplace')
-        self.root  = etree.HTML(html_bytes)
+        html_bytes   = codecs.encode(html_string, 'utf-8', 'xmlcharrefreplace')
+        self.root    = etree.HTML(html_bytes)
         if self.root == None:
           return 
       except Exception as e:
-        print 'ERROR: ', e
-      self.base_url = domain(url_string) 
-
+        print 'Exception: ', e
+        self.root = None
+        return
+      self.domain = domain(url) 
 
       # Parse <a> tags for links and assets
       for e in self.root.iter('a'):
-      #for e in self.root.xpath('//a'):
-        #print 'Unsanitized Child-link: %s' % (e.get('href'))
-        link = urljoin(url_string, e.get('href'))
-        #print 'Sanitized Child-link: %s' % (link)
+        link = urljoin(url, e.get('href'))
 
-        # Strip off URL queries and fragments
-        parts = list(urlparse(link, allow_fragments=False))
+        # Check if url is valid
+        u = urlparse(link, allow_fragments=False)
+        if not validURL(link):
+          continue
+
+        # Strip URL queries 
+        parts = list(u)
         parts[4] = '' 
         link = urlunparse(parts)
-        #print 'Stripped Child-link: %s' % (link)
 
-        suffix = link[-4:]
-        if suffix in ['.pdf', '.zip', '.eps', '.jpg', '.png', '.gif', '.svg', '.qtl']:
+        # Determine if this <a> tag points to a parse-able link, or a static asset
+        linked_asset_types = ('.pdf', '.zip', '.eps', '.jpg', '.png', '.gif', 
+                              '.svg', '.qtl')
+        link_type = link[-4:]
+        if link_type in linked_asset_types:
           self.assets.add(link)
         else:
           self.links.add(link)
 
       # Parse <link> tags for assets
       for e in self.root.iter('link'):
-      #for e in self.root.xpath('//link'):
-        link = urljoin(url_string, e.get('href'))
+        link = urljoin(url, e.get('href'))
         self.assets.add(link)
 
       # Parse <script> tags for assets
       for e in self.root.iter('script'):
-      #for e in self.root.xpath('//script'):
         src = e.get('src')
         if src:
-          link = urljoin(url_string, e.get('src'))
+          link = urljoin(url, e.get('src'))
           self.assets.add(link)
 
       # Parse <img> tags for assets
       for e in self.root.iter('img'):
-      #for e in self.root.xpath('img'):
-        link = urljoin(url_string, e.get('src'))
+        link = urljoin(url, e.get('src'))
         self.assets.add(link)
 
   def isEmpty(self):
     """
-    Returns true if this instance failed to retrieve web content during 
-    construction, leaving this ParseHtml instance with no useful data.
+    Returns True if this instance failed to retrieve web content during 
+    construction.
     """
     return self.root == None
 
@@ -90,40 +97,43 @@ class ParseHtml:
     return self.assets
 
   def getDomain(self):
-    return self.base_url
+    return self.domain
 
-  def sameDomain(self, url_string):
+  def sameDomain(self, url):
     """
     Return whether the given url string is in this ParseHtml instance's domain.
     """
-    up = urlparse(url_string)
+    up = urlparse(url)
     return self.getDomain() == up.scheme + '://' + up.netloc
 
 """
   Helper Functions
 """
 
-def getHtml(url_string):
+def getHtml(url):
   """
   Make an HTTP request to the given url string and return the HTML string.
   """
   try:
-    resp = requests.get(url_string)
+    resp = requests.get(url)
     if resp.status_code != 200:
-      print 'getHtml(%s) failed. Status code = %s' % (url_string,resp.status_code)
       result = None
     else:
       result = resp.text
       assert type(result) is unicode
 
   except Exception as e:
-    print 'Exception Handled: ', e 
+    print 'Exception: ', e 
     return None
 
   return result
 
-def domain(url_string):
-  if not url_string:
+def domain(url):
+  if not url:
     return ''
-  up = urlparse(url_string)
+  up = urlparse(url)
   return up.scheme + '://' + up.netloc
+
+def validURL(url):
+  u = urlparse(url, allow_fragments=False)
+  return (u.scheme != '' and u.netloc != '')

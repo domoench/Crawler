@@ -1,6 +1,8 @@
 """
-TODO
+  A worker thread class. Each thread continually processes URLs from the 
+  crawlqueue and adds the results to the outqueue.
 """
+
 # Library Imports
 import threading
 import Queue
@@ -33,22 +35,21 @@ class CrawlThread(threading.Thread):
     """
     while True:
       url = self.crawlqueue.get()
-      #print 'Removed %s from the crawlqueue' % url
       page_data = self.processPage(url)
+
+      # If getting this page's data from the network fails, move on
       if not page_data:
         self.crawlqueue.task_done()
         continue
 
       # This page's data is ready for printing
-      #print 'Adding %s to outqueue' % url
       self.outqueue.put(page_data)
   
-      # Schedule this page's children for crawling 
+      # Schedule this page's children for crawling. Only one thread can access
+      # the crawled set at a time.
       self.lock.acquire()
-      #print 'Aquired lock to recurse on %s' % url
       for link in page_data[1]:
         if (link not in self.crawled) and (domain(link) == self.domain):
-          #print 'Adding %s to crawlqueue' % link
           self.crawlqueue.put(link)
           self.crawled.add(link)
       self.lock.release()
@@ -65,7 +66,6 @@ class CrawlThread(threading.Thread):
       A tuple of the form (url, list of link strings, list of asset path strings)
       None if there was an issue processing this page
     """
-    #print 'crawlthread.processPage(%s)' % (url)
     assert(domain(url) == self.domain)
     p = ParseHtml(url)
     if p.isEmpty():
