@@ -8,7 +8,7 @@ import threading
 import Queue
 
 # Local Module Imports
-from parseHtml import ParseHtml, domain
+from parsehtml import ParseHtml, domain
 
 class CrawlThread(threading.Thread):
 
@@ -31,7 +31,7 @@ class CrawlThread(threading.Thread):
 
   def run(self):
     """
-    Crawl!
+    Process jobs on the crawlqueue.
     """
     while True:
       url = self.crawlqueue.get()

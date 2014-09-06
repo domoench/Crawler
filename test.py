@@ -1,9 +1,11 @@
 from unittest import main, TestCase
 import threading
 import Queue
+from StringIO import StringIO
 
-from parseHtml import ParseHtml, getHtml, domain, validURL
+from parsehtml import ParseHtml, getHtml, domain, validURL
 from crawlthread import CrawlThread
+from outputthread import OutputThread
 
 class TestParseHtml(TestCase):
 
@@ -115,5 +117,35 @@ class TestCrawlThread(TestCase):
       'http://davidmoench.com/fancybox/source/jquery.fancybox.css?v=2.1.4',
       'http://davidmoench.com/fancybox/source/jquery.fancybox.pack.js?v=2.1.4'])
     self.assertEqual(assets, a)
+
+class TestOutputThread(TestCase):
+
+  def test_writeData(self):
+    url = 'http://cholula.com/'
+    l = ['http://cholula.com/about/heritage.php', 
+         'http://cholula.com/video/index.php',
+         'http://cholula.com/recipes/appetizers/']
+    a = ['http://cholula.com/js/fancybox/jquery.fancybox-1.3.1.css',
+         'http://cholula.com/images/icon-facebook.png',
+         'http://cholula.com/css/master.css']
+    page_data = (url, l, a)
+
+    w = StringIO()
+    t = OutputThread(None, w)
+    t.writeData(page_data)
+
+    actual   = w.getvalue()
+    expected = ('http://cholula.com/' + '\n' +
+    'LINKS:' + '\n' +
+    '  http://cholula.com/about/heritage.php' + '\n' +
+    '  http://cholula.com/video/index.php' + '\n' +
+    '  http://cholula.com/recipes/appetizers/' + '\n' +
+    'ASSETS:' + '\n' +
+    '  http://cholula.com/js/fancybox/jquery.fancybox-1.3.1.css' + '\n' +
+    '  http://cholula.com/images/icon-facebook.png' + '\n' +
+    '  http://cholula.com/css/master.css' + '\n' +
+    '\n')
+
+    self.assertEqual(actual, expected)
 
 main()

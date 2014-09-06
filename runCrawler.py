@@ -5,13 +5,14 @@
 # Library Imports
 import argparse
 import threading
+import codecs
 import Queue
 from datetime import datetime
 
 # Local Module Imports
 from crawlthread import CrawlThread
 from outputthread import OutputThread
-from parseHtml import domain
+from parsehtml import domain
 
 def main():
   # Parse command line args
@@ -27,13 +28,12 @@ def main():
 
   print 'Crawling Beginning.'
   start_time = datetime.now()
+  d = domain(start_url)
 
   crawlqueue = Queue.Queue()
   outqueue   = Queue.Queue()
   lock       = threading.Lock()
   crawled    = set()
-
-  d = domain(start_url)
 
   # Start Crawler threads
   print 'Spawning %d crawler threads.' % num_crawlers
@@ -43,14 +43,18 @@ def main():
     t.start()
 
   # Start sitemap output thread
-  t = OutputThread(outqueue)
+  f = codecs.open('sitemap.txt', 'w', encoding='utf-8')
+  t = OutputThread(outqueue, f)
   t.setDaemon(True)
   t.start()
 
+  # Kick off the crawling
   crawlqueue.put(start_url)
 
+  # Wait for completion
   crawlqueue.join()
   outqueue.join()
+  f.close()
 
   dt = datetime.now() - start_time
   print 'Crawling finished. Time elapsed: ', dt 

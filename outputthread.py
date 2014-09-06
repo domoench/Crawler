@@ -5,18 +5,18 @@
 # Library Imports
 import threading
 import Queue
-import codecs
 
 class OutputThread(threading.Thread):
 
-  def __init__(self, outqueue):
+  def __init__(self, outqueue, w):
+    """
+    Args:
+      outqueue: A Queue of crawled page data jobs ready for output
+      w: A File object to write output to
+    """
     self.outqueue = outqueue
-    self.outfile  = codecs.open('sitemap.txt', 'w', encoding='utf-8')
+    self.w = w 
     threading.Thread.__init__(self)
-
-  def __del__(self):
-    self.outfile.close()
-    threading.Thread.__del__(self)
 
   def run(self):
     while True:
@@ -35,15 +35,15 @@ class OutputThread(threading.Thread):
     links  = page_data[1]
     assets = page_data[2]
 
-    f = self.outfile
-    f.write(url + '\n')
+    w = self.w
+    w.write(url + '\n')
 
-    f.write('LINKS:\n')
+    w.write('LINKS:\n')
     for link in links:
-      f.write('  ' + link + '\n')
+      w.write('  ' + link + '\n')
 
-    f.write('ASSETS:\n')
+    w.write('ASSETS:\n')
     for asset in assets:
-      f.write('  ' + asset + '\n')
+      w.write('  ' + asset + '\n')
 
-    self.outfile.write('\n')
+    w.write('\n')
