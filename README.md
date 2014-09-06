@@ -1,9 +1,9 @@
-# A multi-thread web crawler
+A multi-thread web crawler
 
-## Required Python Dependencies:
+### Required Python Dependencies:
 * lxml
 
-## To Run:
+### To Run:
 ```
 python runCrawler.py -url https://website.com -t 60
 ```
