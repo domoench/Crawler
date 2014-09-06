@@ -1,11 +1,16 @@
-A multi-thread web crawler
+A multi-thread web crawler. Developed for compatibility with Python 2.7.8.
 
-### Required Python Dependencies:
+### Required Python Dependencies (that need explicit installation):
 * lxml
 
 ### To Run:
 ```
 python runCrawler.py -url https://website.com -t 60
+```
+
+### To Test:
+```
+python test.py
 ```
 
 ### Command Line Options:
